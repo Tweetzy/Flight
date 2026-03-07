@@ -344,10 +344,16 @@ public class GuiManager {
                 if (!unlocked) event.setCancelled(true);
 
                 if (gui.onClick(manager, player, top, event)) {
-                    if (event.getRawSlot() == gui.nextPageIndex || event.getRawSlot() == gui.prevPageIndex) {
+                    // Skip playing click/navigate sound if the click caused a GUI transition (inventory changed)
+                    if (player.getOpenInventory().getTopInventory() != top) {
+                        // GUI was replaced (e.g. confirm purchase), don't play another sound
+                    } else if (event.getRawSlot() == gui.nextPageIndex || event.getRawSlot() == gui.prevPageIndex) {
                         if (gui.getNavigateSound() != null)
                             player.playSound(player.getLocation(), gui.getNavigateSound().parseSound(), 1F, 1F);
                         else if (gui.getDefaultSound() != null)
+                            player.playSound(player.getLocation(), gui.getDefaultSound().parseSound(), 1F, 1F);
+                    } else {
+                        if (gui.getDefaultSound() != null)
                             player.playSound(player.getLocation(), gui.getDefaultSound().parseSound(), 1F, 1F);
                     }
                 }

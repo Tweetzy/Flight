@@ -123,8 +123,13 @@ public abstract class Input implements Listener, Runnable {
     )
     public void onChat(AsyncPlayerChatEvent e) {
         if (e.getPlayer().equals(this.player)) {
-            this.onInput(e.getMessage());
             e.setCancelled(true);
+            final String message = e.getMessage();
+            Bukkit.getScheduler().runTask(this.plugin, () -> {
+                if (!this.closed && this.player != null && this.player.isOnline()) {
+                    this.onInput(message);
+                }
+            });
         }
     }
 
