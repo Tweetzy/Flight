@@ -6,7 +6,7 @@
 
     <groupId>ca.tweetzy</groupId>
     <artifactId>flight</artifactId>
-    <version>3.44.0</version>
+    <version>3.45.0</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>16</java.version>
+        <lombok.version>1.18.38</lombok.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
@@ -60,7 +61,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.21.10-R0.1-SNAPSHOT</version>
+            <version>26.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -90,12 +91,12 @@
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-api</artifactId>
-            <version>2.15.5</version>
+            <version>2.15.7</version>
         </dependency>
         <dependency>
-            <groupId>com.github.cryptomorin</groupId>
+            <groupId>io.github.almighty-satan</groupId>
             <artifactId>XSeries</artifactId>
-            <version>13.6.0</version>
+            <version>13.6.0+26.1</version>
             <scope>compile</scope>
         </dependency>
 
@@ -103,7 +104,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -175,6 +176,13 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -225,6 +233,7 @@
                             <include>com.github.cryptomorin:*</include>
                             <include>io.github.bananapuncher714:*</include>
                             <include>com.cryptomorin.xseries:*</include>
+                            <include>io.github.almighty-satan:*</include>
                             <include>org.yaml:snakeyaml</include>
                             <include>de.tr7zw:*</include>
                         </includes>

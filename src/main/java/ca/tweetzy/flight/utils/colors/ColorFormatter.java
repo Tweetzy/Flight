@@ -311,10 +311,10 @@ public final class ColorFormatter {
     }
 
     /**
-     * Gets a simplified major version (..., 9, 10, ..., 14).
-     * In most cases, you shouldn't be using this method.
+     * Gets a simplified version number for feature gating (e.g. legacy {@code 1.x} minor like 21 for 1.21,
+     * or year-based major like 26 for 26.x).
      *
-     * @return the simplified major version.
+     * @return the parsed version component, or 16 if parsing fails (assume RGB-capable).
      *
      * @since 1.0.0
      */
@@ -322,20 +322,34 @@ public final class ColorFormatter {
         String version = Bukkit.getVersion();
         Validate.notEmpty(version, "Cannot get major Minecraft version from null or empty string");
 
-        // getVersion()
         int index = version.lastIndexOf("MC:");
         if (index != -1) {
-            version = version.substring(index + 4, version.length() - 1);
+            version = version.substring(index + 4).trim();
+            int paren = version.indexOf(')');
+            if (paren != -1) {
+                version = version.substring(0, paren).trim();
+            }
         } else if (version.endsWith("SNAPSHOT")) {
-            // getBukkitVersion()
             index = version.indexOf('-');
             version = version.substring(0, index);
         }
 
-        // 1.13.2, 1.14.4, etc...
         int lastDot = version.lastIndexOf('.');
-        if (version.indexOf('.') != lastDot) version = version.substring(0, lastDot);
+        if (version.indexOf('.') != lastDot) {
+            version = version.substring(0, lastDot);
+        }
 
-        return Integer.parseInt(version.substring(2));
+        String[] parts = version.split("\\.");
+        try {
+            if (parts.length >= 2 && "1".equals(parts[0])) {
+                return Integer.parseInt(parts[1]);
+            }
+            if (parts.length >= 1 && !parts[0].isEmpty()) {
+                return Integer.parseInt(parts[0]);
+            }
+        } catch (NumberFormatException ignored) {
+            // fall through
+        }
+        return 16;
     }
 }

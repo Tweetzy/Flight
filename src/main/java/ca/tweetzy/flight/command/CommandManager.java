@@ -28,7 +28,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
@@ -442,31 +441,18 @@ public final class CommandManager implements CommandExecutor, TabCompleter {
 
     public static void registerCommandDynamically(Plugin plugin, String command, CommandExecutor executor, TabCompleter tabManager) {
         try {
-            // Retrieve the SimpleCommandMap from the server
-            Class<?> clazzCraftServer = Bukkit.getServer().getClass();
-            Object craftServer = clazzCraftServer.cast(Bukkit.getServer());
-            SimpleCommandMap commandMap = (SimpleCommandMap) craftServer.getClass()
-                    .getDeclaredMethod("getCommandMap").invoke(craftServer);
+            CommandMap commandMap = getCommandMap();
 
-            // Construct a new Command object
             Constructor<PluginCommand> constructorPluginCommand = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
             constructorPluginCommand.setAccessible(true);
             PluginCommand commandObject = constructorPluginCommand.newInstance(command, plugin);
 
-            // Handle timings for Paper 1.8 more safely
             handlePaperTimings(plugin, commandObject);
 
-            // Set command action
             commandObject.setExecutor(executor);
-
-            // Set tab complete
             commandObject.setTabCompleter(tabManager);
 
-            // Register the command
-            Field fieldKnownCommands = SimpleCommandMap.class.getDeclaredField("knownCommands");
-            fieldKnownCommands.setAccessible(true);
-            Map<String, org.bukkit.command.Command> knownCommands = (Map<String, org.bukkit.command.Command>) fieldKnownCommands.get(commandMap);
-            knownCommands.put(command, commandObject);
+            commandMap.register(plugin.getName().toLowerCase(Locale.ROOT), commandObject);
         } catch (ReflectiveOperationException ex) {
             plugin.getLogger().severe("Error registering command dynamically: " + ex.getMessage());
             plugin.getLogger().severe("Stack trace:");
@@ -480,9 +466,9 @@ public final class CommandManager implements CommandExecutor, TabCompleter {
 
     private static void handlePaperTimings(Plugin plugin, PluginCommand commandObject) {
         try {
-            if (ServerProject.isServer(ServerProject.PAPER, ServerProject.TACO) && ServerVersion.isServerVersionBelow(ServerVersion.V1_9)) {
+            if (ServerProject.isServer(ServerProject.PAPER, ServerProject.TACO) && ServerVersion.isServerVersion(ServerVersion.V1_7, ServerVersion.V1_8)) {
                 Class<?> timingsManagerClass = Class.forName("co.aikar.timings.TimingsManager");
-                Method getCommandTiming = timingsManagerClass.getMethod("getCommandTiming", String.class, Command.class);
+                Method getCommandTiming = timingsManagerClass.getMethod("getCommandTiming", String.class, org.bukkit.command.Command.class);
                 Field timingsField = PluginCommand.class.getDeclaredField("timings");
                 timingsField.setAccessible(true);
 

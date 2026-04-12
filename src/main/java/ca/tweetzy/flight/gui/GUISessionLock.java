@@ -9,36 +9,28 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Tracks the active server-side Gui instance per player.
- * Prevents old/delayed client packets from interacting with
- * previous GUI instances (UI desync / dupe exploits).
- *
- * Now memory-safe using WeakReferences and supports optional auto-expiry.
+ * Tracks the active server-side {@link Gui} instance per player.
+ * Prevents old or delayed client packets from interacting with a previous GUI instance
+ * (UI desync / dupe exploits) by requiring the event's GUI to match the registered one.
+ * <p>
+ * Sessions end when the GUI closes or a new one opens ({@link #end}, {@link #start}).
+ * {@link WeakReference} avoids retaining GUI objects after they are otherwise unreachable.
  */
 public final class GUISessionLock {
 
     /** Debug flag: set to true to log blocked invalid GUI interactions. */
     private static final boolean DEBUG = false;
 
-    /** How long a session remains valid after opening (in ms). */
-    private static final long SESSION_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
-
     private static final Map<UUID, Session> ACTIVE_GUI = new ConcurrentHashMap<>();
 
     private GUISessionLock() {}
 
-    /** Internal holder class for player GUI session data. */
+    /** Internal holder: weak ref so we do not leak GUI instances if cleanup is missed. */
     private static final class Session {
         final WeakReference<Gui> guiRef;
-        final long timestamp;
 
         Session(Gui gui) {
             this.guiRef = new WeakReference<>(gui);
-            this.timestamp = System.currentTimeMillis();
-        }
-
-        boolean isExpired() {
-            return System.currentTimeMillis() - timestamp > SESSION_TIMEOUT_MS;
         }
     }
 
@@ -49,8 +41,8 @@ public final class GUISessionLock {
     }
 
     /**
-     * Returns true if the given Gui is still the active, valid GUI for the player.
-     * Also automatically cleans up expired or garbage-collected sessions.
+     * Returns true if the given Gui is still the active GUI for the player.
+     * Removes the session if the stored reference was cleared or does not match {@code gui}.
      */
     public static boolean isValid(UUID playerId, Gui gui) {
         Session session = ACTIVE_GUI.get(playerId);
@@ -58,10 +50,10 @@ public final class GUISessionLock {
 
         Gui stored = session.guiRef.get();
 
-        if (stored == null || stored != gui || session.isExpired()) {
-            ACTIVE_GUI.remove(playerId); // cleanup stale/expired session
-            if (DEBUG && stored != gui) {
-                Bukkit.getLogger().info("[GUISessionLock] Invalid or expired GUI packet blocked for " + playerId);
+        if (stored == null || stored != gui) {
+            ACTIVE_GUI.remove(playerId);
+            if (DEBUG) {
+                Bukkit.getLogger().info("[GUISessionLock] Invalid GUI packet blocked for " + playerId);
             }
             return false;
         }
@@ -74,17 +66,19 @@ public final class GUISessionLock {
         ACTIVE_GUI.remove(playerId);
     }
 
-    /** Returns the current GUI for the player, or null if none active. */
+    /** Returns the current GUI for the player, or null if none active or reference cleared. */
     public static Gui get(UUID playerId) {
         Session session = ACTIVE_GUI.get(playerId);
-        if (session == null || session.isExpired()) {
+        if (session == null) return null;
+        Gui gui = session.guiRef.get();
+        if (gui == null) {
             ACTIVE_GUI.remove(playerId);
             return null;
         }
-        return session.guiRef.get();
+        return gui;
     }
 
-    /** Optional: manually clear all GUI session locks (e.g., on plugin disable). */
+    /** Manually clear all GUI session locks (e.g., on plugin disable). */
     public static void clearAll() {
         ACTIVE_GUI.clear();
     }

@@ -451,10 +451,10 @@ public class Gui {
         }
 
         // Security validation: ensure this GUI is still the active session
-        // This prevents transitions from stale/expired GUI instances
+        // This prevents transitions from stale or non-current GUI instances
         if (!GUISessionLock.isValid(player.getUniqueId(), this)) {
             // If this GUI is not valid, just show the new GUI without transition flag
-            // This handles edge cases where session expired
+            // This handles edge cases where the session is no longer valid
             manager.showGUI(player, newGui);
             return;
         }

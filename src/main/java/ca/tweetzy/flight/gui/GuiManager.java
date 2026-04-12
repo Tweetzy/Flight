@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
  * ✅ Handles InventoryView interface/class differences safely
  * ✅ Prevents packet-based duplication exploits
  * ✅ Fully async-safe (never calls Bukkit methods off the main thread)
- * ✅ Automatic session expiry cleanup
+ * ✅ Per-player GUI session lock (instance match + lifecycle via {@link GUISessionLock})
  */
 public class GuiManager {
 
@@ -208,7 +208,7 @@ public class GuiManager {
 
         /**
          * Validates the player's GUI session.
-         * Automatically cleans up expired or invalid sessions.
+         * Automatically cleans up invalid sessions (wrong GUI instance or cleared reference).
          * 
          * Additional validation ensures:
          * 1. Session lock matches the GUI instance
@@ -308,7 +308,7 @@ public class GuiManager {
             Gui gui = holder.getGUI();
 
             // CRITICAL: Session validation - cancel if invalid to prevent other plugins from processing stale clicks
-            // This is essential for preventing clicks on expired/stale GUI instances from being processed
+            // This is essential for preventing clicks on stale/wrong GUI instances from being processed
             // by other plugins that might have higher priority handlers
             if (!validateSession(player, gui)) {
                 event.setCancelled(true);
