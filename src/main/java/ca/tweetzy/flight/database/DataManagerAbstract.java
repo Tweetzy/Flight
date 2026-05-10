@@ -29,6 +29,8 @@ import ca.tweetzy.flight.database.sync.DatabaseEvent;
 import ca.tweetzy.flight.database.sync.DatabaseEventListener;
 import ca.tweetzy.flight.database.sync.RedisLockManager;
 import ca.tweetzy.flight.database.sync.RedisSyncManager;
+import ca.tweetzy.flight.dependency.DependencyLoader;
+import ca.tweetzy.flight.dependency.RuntimeDependencies;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -38,22 +40,30 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
+/**
+ * Coordinates database access, optional Redis sync, and a single-worker async queue for tasks.
+ * <p>
+ * {@link DatabaseConnector#connect} obtains a pooled {@link java.sql.Connection} for the duration of each callback;
+ * do not retain or share {@code Connection} instances across {@link #runAsync} tasks or threads. The async executor
+ * only serializes when work is submitted through it; misuse of connections outside that contract remains unsafe.
+ */
 public class DataManagerAbstract {
     protected final DatabaseConnector databaseConnector;
     protected final Plugin plugin;
 
-    protected final ExecutorService asyncPool = Executors.newSingleThreadExecutor();
+    private final ThreadPoolExecutor asyncPool;
     
     private QueryBuilder queryBuilder;
     private RedisSyncManager redisSyncManager;
@@ -67,6 +77,14 @@ public class DataManagerAbstract {
     public DataManagerAbstract(DatabaseConnector databaseConnector, Plugin plugin) {
         this.databaseConnector = databaseConnector;
         this.plugin = plugin;
+        this.asyncPool = new ThreadPoolExecutor(
+                1,
+                1,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                runnable -> new Thread(runnable, plugin.getName() + "-Flight-DB")
+        );
     }
 
     /**
@@ -103,7 +121,7 @@ public class DataManagerAbstract {
             result.next();
             id = result.getInt(1);
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            this.plugin.getLogger().log(Level.SEVERE, "lastInsertedId query failed", ex);
         }
 
         return id;
@@ -132,9 +150,10 @@ public class DataManagerAbstract {
         runAsync(runnable, null);
     }
 
-    // FIXME: The problem with a single threaded async queue is that the database implementations and this queue
-    //        are **not** thread-safe in any way. The connection is not pooled or anything...
-    //        So the actual problem is that plugins just queue way too much tasks on bulk which it just shouldn't need to do...
+    /**
+     * Runs work on a single background thread. Combine with {@link DatabaseConnector#connect} inside the task so each
+     * unit of work uses its own short-lived connection from the pool.
+     */
     public void runAsync(Runnable task, Consumer<Throwable> callback) {
         this.asyncPool.execute(() -> {
             try {
@@ -149,7 +168,7 @@ public class DataManagerAbstract {
                     return;
                 }
 
-                th.printStackTrace();
+                this.plugin.getLogger().log(Level.SEVERE, "Async database task failed", th);
             }
         });
     }
@@ -166,12 +185,13 @@ public class DataManagerAbstract {
         return this.asyncPool.isTerminated();
     }
 
+    /**
+     * Approximate number of async tasks not yet finished: queued plus any currently executing on the worker thread.
+     */
     public long getTaskQueueSize() {
-        if (this.asyncPool instanceof ThreadPoolExecutor) {
-            return ((ThreadPoolExecutor) this.asyncPool).getTaskCount();
-        }
-
-        return -1;
+        long queued = this.asyncPool.getQueue().size();
+        long active = this.asyncPool.getActiveCount();
+        return queued + Math.min(active, 1);
     }
 
     /**
@@ -322,7 +342,9 @@ public class DataManagerAbstract {
             plugin.getLogger().warning("Redis sync manager already initialized");
             return redisSyncManager.isEnabled();
         }
-        
+
+        new DependencyLoader(plugin).loadDependencies(Collections.singleton(RuntimeDependencies.jedis()));
+
         redisSyncManager = new RedisSyncManager(plugin, channel);
         boolean success = redisSyncManager.initialize(host, port, password);
         

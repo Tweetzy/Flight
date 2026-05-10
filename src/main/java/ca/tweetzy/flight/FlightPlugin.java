@@ -18,6 +18,7 @@
 
 package ca.tweetzy.flight;
 
+import ca.tweetzy.flight.comp.enums.ServerVersion;
 import ca.tweetzy.flight.config.tweetzy.TweetzyYamlConfig;
 import ca.tweetzy.flight.database.DataManagerAbstract;
 import ca.tweetzy.flight.dependency.Dependency;
@@ -101,23 +102,21 @@ public abstract class FlightPlugin extends JavaPlugin implements Listener {
         ));
         
         // Gson is provided by Spigot - no need to load it
-        
-        // Load Jedis (Redis) only if needed - it's optional for Redis sync
-        dependencies.add(new Dependency(
-                "https://repo1.maven.org/maven2",
-                "redis.clients",
-                "jedis",
-                "5.1.0",
-                true,
-                new Relocation("redis.clients", "ca.tweetzy.flight.third_party.redis.clients")
-        ));
-        
+        // Jedis is loaded lazily when DataManagerAbstract.initializeRedisSync runs
+
         return dependencies;
     }
 
     @Override
     public final void onEnable() {
         if (this.emergencyStop) {
+            setEnabled(false);
+            return;
+        }
+
+        if (ServerVersion.isServerVersionBelow(ServerVersion.V1_16)) {
+            getLogger().severe("Flight requires Minecraft 1.16 or newer. Detected: "
+                    + Bukkit.getServer().getBukkitVersion());
             setEnabled(false);
             return;
         }
@@ -252,7 +251,8 @@ public abstract class FlightPlugin extends JavaPlugin implements Listener {
                                 "We are giving him another %d seconds until we forcefully shut him down " +
                                 "(continuing to report in %d second intervals)",
                         dataManager.getTaskQueueSize(), secondsUntilForceShutdown, reportInterval));
-            } catch (InterruptedException ignore) {
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
             } finally {
                 secondsUntilForceShutdown -= secondsToWait;
             }

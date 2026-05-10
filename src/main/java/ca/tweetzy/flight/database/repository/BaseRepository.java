@@ -25,6 +25,7 @@ import ca.tweetzy.flight.database.SQLiteConnector;
 import ca.tweetzy.flight.database.query.DeleteQuery;
 import ca.tweetzy.flight.database.query.QueryBuilder;
 import ca.tweetzy.flight.database.query.SelectQuery;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +34,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Base implementation of Repository interface
@@ -228,13 +230,13 @@ public class BaseRepository<T, ID> implements Repository<T, ID> {
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackEx) {
-                    rollbackEx.printStackTrace();
+                    Bukkit.getLogger().log(Level.SEVERE, "Batch save rollback failed", rollbackEx);
                 }
             } finally {
                 try {
                     connection.setAutoCommit(true);
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    Bukkit.getLogger().log(Level.SEVERE, "Failed to restore auto-commit after batch save", ex);
                 }
             }
             
@@ -327,13 +329,13 @@ public class BaseRepository<T, ID> implements Repository<T, ID> {
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackEx) {
-                    rollbackEx.printStackTrace();
+                    Bukkit.getLogger().log(Level.SEVERE, "Batch delete rollback failed", rollbackEx);
                 }
             } finally {
                 try {
                     connection.setAutoCommit(true);
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    Bukkit.getLogger().log(Level.SEVERE, "Failed to restore auto-commit after batch delete", ex);
                 }
             }
             

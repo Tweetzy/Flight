@@ -1,6 +1,6 @@
 # Brigadier Support
 
-Brigadier is Minecraft's modern command framework introduced in version 1.13. Flight provides support for Brigadier commands, offering better tab completion performance and native Minecraft command integration.
+Brigadier is Minecraft's modern command framework introduced in version 1.13. **Flight requires Minecraft 1.16+**; Brigadier integration is enabled when `com.mojang.brigadier` (and for Modern Brigadier, NMS command types) are present on the server.
 
 ## Overview
 
@@ -9,7 +9,7 @@ Brigadier support provides:
 - **Better tab completion** - More efficient and responsive
 - **Native integration** - Works with Minecraft's command system
 - **Improved suggestions** - Better command suggestions
-- **Version requirement** - Only works on Minecraft 1.13+
+- **Availability** - Requires Brigadier on the classpath; use `isAvailable()` if you support unusual server builds
 
 ## Checking Availability
 
@@ -17,7 +17,7 @@ Before using Brigadier, check if it's available:
 
 ```java
 if (!BrigadierCommandManager.isAvailable()) {
-    plugin.getLogger().warning("Brigadier requires Minecraft 1.13+");
+    plugin.getLogger().warning("Brigadier is not available (missing Brigadier on classpath).");
     return;
 }
 ```
@@ -76,7 +76,7 @@ public class BrigadierCommands {
     public void register() {
         // Check if Brigadier is available
         if (!BrigadierCommandManager.isAvailable()) {
-            plugin.getLogger().warning("Brigadier requires Minecraft 1.13+");
+            plugin.getLogger().warning("Brigadier is not available (missing Brigadier on classpath).");
             return;
         }
 
@@ -193,7 +193,7 @@ Minecraft's command system provides better suggestions and autocomplete for Brig
 
 ## Version Compatibility
 
-**Important:** Brigadier is only available on Minecraft 1.13+. Always check availability before using:
+**Important:** Flight requires **Minecraft 1.16+**. Brigadier has been part of the game since 1.13 and is present on normal Spigot/Paper builds; still call `isAvailable()` for edge cases or custom servers:
 
 ```java
 if (!BrigadierCommandManager.isAvailable()) {
@@ -243,14 +243,14 @@ org.bukkit.command.Command command = brigadierManager.createBrigadierCommand(
 ## Best Practices
 
 1. **Always check availability** before using Brigadier
-2. **Provide fallbacks** for older server versions
+2. **Provide fallbacks** when `isAvailable()` is false
 3. **Use descriptive permissions** and descriptions
 4. **Implement proper tab completion** for better UX
 5. **Handle errors gracefully** in the executor
 
 ## Limitations
 
-- **Version requirement** - Only works on 1.13+
+- **Classpath / NMS** - `BrigadierCommandManager` needs Brigadier; `ModernBrigadierManager` also needs NMS command types
 - **No CommandContext** - Uses traditional Bukkit command interface
 - **No ArgumentParser** - Manual argument parsing required
 

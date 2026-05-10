@@ -24,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 public class MySQLConnector implements DatabaseConnector {
 
@@ -58,6 +59,7 @@ public class MySQLConnector implements DatabaseConnector {
             this.initializedSuccessfully = true;
         } catch (Exception ex) {
             this.initializedSuccessfully = false;
+            this.plugin.getLogger().log(Level.SEVERE, "Failed to initialize MySQL connection pool", ex);
         }
     }
 
@@ -68,7 +70,10 @@ public class MySQLConnector implements DatabaseConnector {
 
     @Override
     public void closeConnection() {
-        this.hikari.close();
+        if (this.hikari != null && !this.hikari.isClosed()) {
+            this.hikari.close();
+            this.plugin.getLogger().info("MySQL connection pool closed");
+        }
     }
 
     @Override
@@ -76,8 +81,7 @@ public class MySQLConnector implements DatabaseConnector {
         try (Connection connection = this.hikari.getConnection()) {
             callback.accept(connection);
         } catch (SQLException ex) {
-            this.plugin.getLogger().severe("An error occurred executing a MySQL query: " + ex.getMessage());
-            ex.printStackTrace();
+            this.plugin.getLogger().log(Level.SEVERE, "An error occurred executing a MySQL query", ex);
         }
     }
 }

@@ -51,7 +51,7 @@ Learn how to create and manage commands using Flight's powerful command system.
 - [CommandContext](commands/command-context.md) - Using CommandContext for cleaner code
 - [ArgumentParser](commands/argument-parser.md) - Type-safe argument parsing
 - [Annotation-Based Commands](commands/annotations.md) - Using annotations to register commands
-- [Brigadier Support](commands/brigadier.md) - Modern command registration for 1.13+
+- [Brigadier Support](commands/brigadier.md) - Modern command registration (Flight targets 1.16+)
 - [Tab Completion](commands/tab-completion.md) - Implementing tab completion
 
 ### [GUI System](gui.md)
@@ -184,7 +184,7 @@ ItemStack item = QuickItem.of(Material.DIAMOND_SWORD)
 
 Flight supports:
 
-- **Minecraft**: 1.8+ (some features require 1.13+)
+- **Minecraft**: 1.16+
 - **Java**: 16+
 - **Server Types**: Spigot, Paper, and compatible forks
 

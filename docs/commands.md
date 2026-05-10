@@ -10,7 +10,7 @@ The Flight command system offers:
 - **CommandContext** - Modern, type-safe command execution context
 - **ArgumentParser** - Type-safe argument parsing with validation
 - **Annotation-Based Commands** - Register commands using annotations
-- **Brigadier Support** - Modern command registration for Minecraft 1.13+
+- **Brigadier Support** - Modern command registration (Flight targets Minecraft 1.16+)
 - **Tab Completion** - Easy-to-implement tab completion
 
 ## Quick Start
@@ -101,12 +101,12 @@ Register commands using annotations instead of extending classes. This approach 
 - When to use annotations
 
 ### [Brigadier Support](commands/brigadier.md)
-Brigadier is Minecraft's modern command framework (introduced in 1.13). Flight provides support for Brigadier commands, offering better tab completion and command suggestions.
+Brigadier is Minecraft's modern command framework (introduced in 1.13). Flight targets **Minecraft 1.16+** and provides Brigadier integration when Brigadier/NMS types are present.
 
 **Topics covered:**
 - What is Brigadier?
 - Creating Brigadier commands
-- Version compatibility (1.13+)
+- Availability checks (classpath / server implementation)
 - Benefits of Brigadier
 - Migration guide
 
@@ -135,7 +135,7 @@ Implement tab completion for your commands to improve user experience. Flight ma
 - You prefer declarative style
 
 ### Use Brigadier Commands When:
-- You're targeting Minecraft 1.13+
+- You're on a server where Brigadier is available (Flight requires Minecraft 1.16+)
 - You need better tab completion performance
 - You want native Minecraft command integration
 - You need advanced command suggestions

@@ -19,7 +19,6 @@
 package ca.tweetzy.flight.utils;
 
 import ca.tweetzy.flight.comp.enums.CompMaterial;
-import ca.tweetzy.flight.comp.enums.ServerVersion;
 import ca.tweetzy.flight.hooks.PlaceholderAPIHook;
 import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XItemFlag;
@@ -46,7 +45,6 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -309,9 +307,6 @@ public final class QuickItem {
         // Override with given material
         if (this.material != null) {
             compiledItem.setType(this.material.get());
-
-            if (ServerVersion.isServerVersionBelow(ServerVersion.V1_13))
-                compiledItem.setData(new MaterialData(this.material.parseMaterial(), this.material.getData()));
         }
 
         // Skip if air
@@ -388,11 +383,12 @@ public final class QuickItem {
         if (this.amount != -1)
             compiledItem.setAmount(this.amount);
 
-        if (this.modelData != null && ServerVersion.isServerVersionAtLeast(ServerVersion.V1_14))
+        if (this.modelData != null) {
             try {
                 compiledMeta.setCustomModelData(this.modelData);
             } catch (final Throwable ignored) {
             }
+        }
 
         // Apply Bukkit metadata
         compiledItem.setItemMeta(compiledMeta);

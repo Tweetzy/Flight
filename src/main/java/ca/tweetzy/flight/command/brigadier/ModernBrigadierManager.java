@@ -33,12 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
- * Modern Brigadier command manager with true CommandDispatcher integration
- * Provides native Minecraft argument types and better performance
- * 
- * Only works on Minecraft 1.13+ servers
+ * Modern Brigadier command manager with true CommandDispatcher integration.
+ * Flight targets Minecraft 1.16+; NMS types must be present on the server.
  */
 public final class ModernBrigadierManager {
 
@@ -72,7 +71,7 @@ public final class ModernBrigadierManager {
         this.plugin = plugin;
         
         if (!BRIGADIER_AVAILABLE) {
-            Common.log("&cModern Brigadier is not available on this server version. Requires 1.13+");
+            Common.log("&cModern Brigadier is not available (missing Brigadier or NMS command types).");
             return;
         }
         
@@ -107,7 +106,7 @@ public final class ModernBrigadierManager {
             Common.log("&aModern Brigadier initialized successfully!");
         } catch (Exception e) {
             Common.log("&cFailed to initialize Modern Brigadier: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to initialize Modern Brigadier", e);
         }
     }
 
@@ -136,8 +135,12 @@ public final class ModernBrigadierManager {
             Common.log("&aRegistered modern Brigadier command");
         } catch (Exception e) {
             Common.log("&cFailed to register command: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to register modern Brigadier command node", e);
         }
+    }
+
+    JavaPlugin getPlugin() {
+        return plugin;
     }
 
     /**

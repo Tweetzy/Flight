@@ -19,6 +19,7 @@
 package ca.tweetzy.flight.database.query;
 
 import ca.tweetzy.flight.database.DatabaseConnector;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +28,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * Base class for all query types
@@ -111,7 +113,7 @@ public abstract class Query {
                 if (callback != null) {
                     callback.accept(ex);
                 } else {
-                    ex.printStackTrace();
+                    Bukkit.getLogger().log(Level.SEVERE, "Async query execution failed", ex);
                 }
             }
         }).start();

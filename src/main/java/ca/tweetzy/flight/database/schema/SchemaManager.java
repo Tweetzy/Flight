@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 /**
  * Manages database schema creation and updates
@@ -68,8 +69,7 @@ public class SchemaManager {
                 updateTable(entitySchema, pluginVersion);
             }
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to initialize table for " + entityClass.getName() + ": " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to initialize table for " + entityClass.getName(), e);
         }
     }
     
@@ -166,8 +166,7 @@ public class SchemaManager {
             }
             
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to update table: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to update table", e);
         }
     }
     

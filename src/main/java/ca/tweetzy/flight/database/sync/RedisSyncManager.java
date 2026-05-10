@@ -32,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 /**
  * Manages Redis-based database synchronization for multi-server setups
@@ -126,8 +127,7 @@ public class RedisSyncManager {
             plugin.getLogger().info("Redis sync manager initialized successfully");
             return true;
         } catch (Exception ex) {
-            plugin.getLogger().warning("Failed to initialize Redis sync manager: " + ex.getMessage());
-            ex.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Failed to initialize Redis sync manager", ex);
             this.enabled = false;
             return false;
         }
@@ -161,8 +161,7 @@ public class RedisSyncManager {
                 String json = event.toJson();
                 jedis.publish(channel, json);
             } catch (Exception ex) {
-                plugin.getLogger().warning("Failed to publish database event: " + ex.getMessage());
-                ex.printStackTrace();
+                plugin.getLogger().log(Level.WARNING, "Failed to publish database event", ex);
             }
         }, executorService);
     }
@@ -218,8 +217,7 @@ public class RedisSyncManager {
             subscriberThread.setDaemon(true);
             subscriberThread.start();
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to start Redis subscriber: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Failed to start Redis subscriber", e);
         }
     }
     
@@ -365,8 +363,7 @@ public class RedisSyncManager {
                         } catch (Exception ex) {
                             try {
                                 if (plugin.isEnabled()) {
-                                    plugin.getLogger().warning("Error in database event listener: " + ex.getMessage());
-                                    ex.printStackTrace();
+                                    plugin.getLogger().log(Level.WARNING, "Error in database event listener", ex);
                                 }
                             } catch (IllegalStateException | NoClassDefFoundError ignored) {
                                 // Classloader closed, silently ignore
@@ -395,8 +392,7 @@ public class RedisSyncManager {
             } catch (Exception ex) {
                 try {
                     if (plugin.isEnabled()) {
-                        plugin.getLogger().warning("Failed to process incoming Redis message: " + ex.getMessage());
-                        ex.printStackTrace();
+                        plugin.getLogger().log(Level.WARNING, "Failed to process incoming Redis message", ex);
                     }
                 } catch (IllegalStateException | NoClassDefFoundError ignored) {
                     // Classloader closed, silently ignore

@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * Fluent builder for creating modern Brigadier commands
@@ -169,7 +170,7 @@ public final class BrigadierCommandBuilder {
             Common.log("&aRegistered modern Brigadier command: /" + name);
         } catch (Exception e) {
             Common.log("&cFailed to register command: " + e.getMessage());
-            e.printStackTrace();
+            manager.getPlugin().getLogger().log(Level.SEVERE, "Failed to register modern Brigadier command", e);
         }
     }
 
@@ -274,7 +275,7 @@ public final class BrigadierCommandBuilder {
                     
                     return 1; // Success
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    manager.getPlugin().getLogger().log(Level.SEVERE, "Modern Brigadier command execution failed", e);
                     return 0; // Failure
                 }
             }

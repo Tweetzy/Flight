@@ -40,6 +40,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 
 /**
  * The current file has been created by Kiran Hart
@@ -330,8 +331,7 @@ public abstract class Input implements Listener, Runnable {
                             try {
                                 this.onExit(this.player);
                             } catch (Exception e) {
-                                Bukkit.getLogger().warning("Error in Input onExit handler: " + e.getMessage());
-                                e.printStackTrace();
+                                plugin.getLogger().log(Level.WARNING, "Error in Input onExit handler", e);
                             }
                         }
                         this.exiting = false;

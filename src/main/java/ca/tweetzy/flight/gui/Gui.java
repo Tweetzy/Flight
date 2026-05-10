@@ -21,7 +21,6 @@ package ca.tweetzy.flight.gui;
 import org.bukkit.Bukkit;
 import ca.tweetzy.flight.comp.enums.CompMaterial;
 import ca.tweetzy.flight.comp.enums.CompSound;
-import ca.tweetzy.flight.comp.enums.ServerVersion;
 import ca.tweetzy.flight.gui.events.GuiClickEvent;
 import ca.tweetzy.flight.gui.events.GuiCloseEvent;
 import ca.tweetzy.flight.gui.events.GuiDropItemEvent;
@@ -66,6 +65,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 public class Gui {
@@ -965,8 +965,8 @@ public class Gui {
                 opener.onOpen(new GuiOpenEvent(manager, this, player));
             } catch (Exception e) {
                 // Log error but don't crash - GUI is still opened
-                Bukkit.getLogger().severe("Error in GUI open handler for " + this.getClass().getSimpleName() + ": " + e.getMessage());
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.SEVERE,
+                        "Error in GUI open handler for " + this.getClass().getSimpleName(), e);
             }
         }
     }
@@ -999,8 +999,8 @@ public class Gui {
                 closer.onClose(new GuiCloseEvent(manager, this, player));
             } catch (Exception e) {
                 // Log error but don't crash - ensure session is still cleaned up
-                Bukkit.getLogger().severe("Error in GUI close handler for " + this.getClass().getSimpleName() + ": " + e.getMessage());
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.SEVERE,
+                        "Error in GUI close handler for " + this.getClass().getSimpleName(), e);
             }
         }
 

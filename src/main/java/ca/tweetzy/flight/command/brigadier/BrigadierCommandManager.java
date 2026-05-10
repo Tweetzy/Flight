@@ -18,7 +18,6 @@
 
 package ca.tweetzy.flight.command.brigadier;
 
-import ca.tweetzy.flight.comp.enums.ServerVersion;
 import ca.tweetzy.flight.utils.Common;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
@@ -32,6 +31,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Brigadier command manager for Minecraft 1.13+
@@ -46,9 +46,8 @@ public final class BrigadierCommandManager {
     static {
         boolean available = false;
         try {
-            // Check if Brigadier is available (1.13+)
             Class.forName("com.mojang.brigadier.CommandDispatcher");
-            available = ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13);
+            available = true;
         } catch (ClassNotFoundException | NoClassDefFoundError e) {
             available = false;
         }
@@ -62,7 +61,7 @@ public final class BrigadierCommandManager {
         this.plugin = plugin;
         
         if (!BRIGADIER_AVAILABLE) {
-            Common.log("&cBrigadier is not available on this server version. Requires 1.13+");
+            Common.log("&cBrigadier is not available on this server (missing com.mojang.brigadier).");
             this.knownCommands = null;
             return;
         }
@@ -100,7 +99,7 @@ public final class BrigadierCommandManager {
             Common.log("&aRegistered Brigadier command: /" + commandName);
         } catch (Exception e) {
             Common.log("&cFailed to register Brigadier command: " + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to register Brigadier command", e);
         }
     }
 

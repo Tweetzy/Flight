@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * Wrapper for JedisPubSub that uses reflection to handle callbacks
@@ -111,8 +112,7 @@ public class JedisPubSubWrapper {
             
             eventHandler.accept(event);
         } catch (Exception ex) {
-            plugin.getLogger().warning("Failed to process database event: " + ex.getMessage());
-            ex.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "Failed to process database event", ex);
         }
     }
     

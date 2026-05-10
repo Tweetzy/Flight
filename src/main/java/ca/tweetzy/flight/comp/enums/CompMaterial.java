@@ -42,6 +42,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -2642,7 +2643,7 @@ public enum CompMaterial implements XBase<CompMaterial, Material> {
                 // noinspection unchecked
                 mapping = (Map<String, Material>) field.get(null);
             } catch (Throwable e) {
-                new IllegalStateException("Unable to get Material.BY_NAME field", e).printStackTrace();
+                Bukkit.getLogger().log(Level.SEVERE, "Unable to get Material.BY_NAME field", e);
                 mapping = null;
             }
 

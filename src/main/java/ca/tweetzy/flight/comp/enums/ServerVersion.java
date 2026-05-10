@@ -23,6 +23,12 @@ import lombok.Getter;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 
+/**
+ * Detected Minecraft major version from {@link Bukkit#getBukkitVersion()}.
+ * <p>
+ * Flight only supports servers at <strong>1.16</strong> and newer at runtime ({@link ca.tweetzy.flight.FlightPlugin}).
+ * Constants for older releases remain for API compatibility with dependent plugins.
+ */
 @AllArgsConstructor
 public enum ServerVersion {
     V1_7("1.7"),

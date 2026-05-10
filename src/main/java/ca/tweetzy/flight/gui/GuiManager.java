@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
 
 /**
  * Modern, safe GUI Manager for Spigot/Paper 1.20.6 → 1.21+.
@@ -170,7 +171,7 @@ public class GuiManager {
             // Log error but don't crash server - return null to gracefully handle
             Bukkit.getLogger().warning("[GuiManager] Failed to resolve top inventory via reflection: " + e.getMessage());
             if (DEBUG) {
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.FINE, "[GuiManager] Reflection detail (getTopInventoryCompat)", e);
             }
             return null;
         }
@@ -188,7 +189,7 @@ public class GuiManager {
             // Log error but don't crash server - return null to gracefully handle
             Bukkit.getLogger().warning("[GuiManager] Failed to resolve top inventory via reflection: " + e.getMessage());
             if (DEBUG) {
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.FINE, "[GuiManager] Reflection detail (getTopInventory)", e);
             }
             return null;
         }

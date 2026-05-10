@@ -19,7 +19,6 @@
 package ca.tweetzy.flight.utils;
 
 import ca.tweetzy.flight.comp.enums.CompMaterial;
-import ca.tweetzy.flight.comp.enums.ServerVersion;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.ArrayUtils;
@@ -72,10 +71,6 @@ public final class PlayerUtil {
      * @return The item in the player's hand.
      */
     public ItemStack getHand(@NonNull final Player player) {
-        if (ServerVersion.isServerVersionBelow(ServerVersion.V1_9)) {
-            return player.getInventory().getItemInHand();
-        }
-
         return player.getInventory().getItemInMainHand();
     }
 

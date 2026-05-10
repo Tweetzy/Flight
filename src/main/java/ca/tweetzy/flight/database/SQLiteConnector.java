@@ -18,14 +18,14 @@
 
 package ca.tweetzy.flight.database;
 
-import ca.tweetzy.flight.comp.enums.ServerVersion;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.plugin.Plugin;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 public class SQLiteConnector implements DatabaseConnector {
 
@@ -36,15 +36,19 @@ public class SQLiteConnector implements DatabaseConnector {
     public SQLiteConnector(Plugin plugin) {
         this.plugin = plugin;
         
-        String connectionString =
-                ServerVersion.isServerVersionBelow(ServerVersion.V1_16)
-                        ? "jdbc:sqlite:" + plugin.getDataFolder() + File.separator + plugin.getDescription().getName().toLowerCase() + ".db"
-                        : "jdbc:sqlite:" + plugin.getDataFolder() + File.separator + plugin.getDescription().getName().toLowerCase() + ".db?journal_mode=WAL";
+        Path dbPath = plugin.getDataFolder().toPath()
+                .resolve(plugin.getDescription().getName().toLowerCase() + ".db")
+                .toAbsolutePath();
+        String pathForJdbc = dbPath.toUri().getPath();
+        if (pathForJdbc == null) {
+            pathForJdbc = dbPath.toString().replace('\\', '/');
+        }
+        String connectionString = "jdbc:sqlite:" + pathForJdbc + "?journal_mode=WAL";
 
         try {
-            Class.forName("org.sqlite.JDBC"); // This is required to put here for Spigot 1.10 and below to force class load
+            Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "SQLite JDBC driver not found", ex);
         }
 
         plugin.getLogger().info("Initializing SQLite connection pool for " + plugin.getDescription().getName());
@@ -70,8 +74,7 @@ public class SQLiteConnector implements DatabaseConnector {
             plugin.getLogger().info("SQLite connection pool initialized successfully");
         } catch (Exception ex) {
             this.initializedSuccessfully = false;
-            plugin.getLogger().severe("Failed to initialize SQLite connection pool: " + ex.getMessage());
-            ex.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to initialize SQLite connection pool", ex);
         }
     }
 
@@ -98,8 +101,7 @@ public class SQLiteConnector implements DatabaseConnector {
         try (Connection connection = this.hikari.getConnection()) {
             callback.accept(connection);
         } catch (SQLException ex) {
-            this.plugin.getLogger().severe("An error occurred executing an SQLite query: " + ex.getMessage());
-            ex.printStackTrace();
+            this.plugin.getLogger().log(Level.SEVERE, "An error occurred executing an SQLite query", ex);
         }
     }
 }
