@@ -34,6 +34,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -290,6 +291,10 @@ public final class QuickItem {
         return this;
     }
 
+    private boolean isAir(Material material) {
+        return (material == Material.AIR || material == Material.CAVE_AIR || material == Material.VOID_AIR);
+    }
+
     /**
      * Construct a valid {@link ItemStack} from all parameters of this class.
      *
@@ -310,7 +315,7 @@ public final class QuickItem {
         }
 
         // Skip if air
-        if (CompMaterial.isAir(compiledItem.getType()))
+        if (isAir(compiledItem.getType()))
             return compiledItem;
 
 
@@ -334,8 +339,8 @@ public final class QuickItem {
             compiledMeta.setDisplayName(Common.colorize(name));
         }
 
-        List<String> lore = (meta != null && meta.getLore() != null) 
-            ? new ArrayList<>(meta.getLore()) 
+        List<String> lore = (meta != null && meta.getLore() != null)
+            ? new ArrayList<>(meta.getLore())
             : new ArrayList<>();
 
         if (!this.lores.isEmpty()) {

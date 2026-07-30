@@ -20,6 +20,7 @@ package ca.tweetzy.flight.utils.input;
 
 import ca.tweetzy.flight.gui.GUISessionLock;
 import ca.tweetzy.flight.gui.Gui;
+import ca.tweetzy.flight.gui.GuiManager;
 import com.cryptomorin.xseries.messages.ActionBar;
 import com.cryptomorin.xseries.messages.Titles;
 import lombok.NonNull;
@@ -243,7 +244,7 @@ public abstract class Input implements Listener, Runnable {
                         
                         // Still not transitioning and we're still in input mode - close it
                         if (!this.closed && !this.exiting && this.player.isOnline()) {
-                            Inventory currentTop = this.player.getOpenInventory().getTopInventory();
+                            Inventory currentTop = GuiManager.getTopInventoryCompat(this.player.getOpenInventory());
                             if (currentTop != null && currentTop.equals(e.getInventory())) {
                                 this.player.closeInventory();
                             }
@@ -258,7 +259,7 @@ public abstract class Input implements Listener, Runnable {
                     // Close with delay to allow transitions
                     Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                         if (!this.closed && !this.exiting && this.player.isOnline()) {
-                            Inventory currentTop = this.player.getOpenInventory().getTopInventory();
+                            Inventory currentTop = GuiManager.getTopInventoryCompat(this.player.getOpenInventory());
                             if (currentTop != null && currentTop.equals(e.getInventory())) {
                                 this.player.closeInventory();
                             }
@@ -267,9 +268,11 @@ public abstract class Input implements Listener, Runnable {
                 } else {
                     // No GUI info available, close immediately
                     Bukkit.getScheduler().runTask(this.plugin, () -> {
-                        if (this.player.isOnline() && 
-                            this.player.getOpenInventory().getTopInventory().equals(e.getInventory())) {
-                            this.player.closeInventory();
+                        if (this.player.isOnline()) {
+                            Inventory currentTop = GuiManager.getTopInventoryCompat(this.player.getOpenInventory());
+                            if (currentTop != null && currentTop.equals(e.getInventory())) {
+                                this.player.closeInventory();
+                            }
                         }
                     });
                 }

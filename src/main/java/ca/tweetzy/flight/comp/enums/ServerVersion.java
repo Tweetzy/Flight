@@ -55,6 +55,7 @@ public enum ServerVersion {
      * Calendar-style Bukkit versions (year as leading major), e.g. {@code 26.1.2-R0.1-SNAPSHOT} → {@code 26.1}.
      */
     V26_1("26.1"),
+    V26_2("26.2"),
     /**
      * Unrecognized {@link Bukkit#getBukkitVersion()}; must stay last so ordinal comparisons treat it as newer than any known release.
      */

@@ -136,8 +136,8 @@ public class GuiManager {
 
     public void closeAll() {
         openInventories.keySet().removeIf(player -> {
-            Inventory top = player.getOpenInventory().getTopInventory();
-            if (top.getHolder() instanceof GuiHolder) {
+            Inventory top = getTopInventoryCompat(player.getOpenInventory());
+            if (top != null && top.getHolder() instanceof GuiHolder) {
                 player.closeInventory();
                 GUISessionLock.end(player.getUniqueId());
                 return true;
@@ -152,7 +152,7 @@ public class GuiManager {
     // ------------------------------------------------------------------
 
     /**
-     * In API versions 1.20.6 and earlier, InventoryView is a class.
+     * In API versions 1.20.x, InventoryView is a class.
      * In versions 1.21 and later, it is an interface.
      * This method uses reflection to get the top Inventory object from the
      * InventoryView, to avoid runtime errors when compiled against one version
@@ -346,7 +346,7 @@ public class GuiManager {
 
                 if (gui.onClick(manager, player, top, event)) {
                     // Skip playing click/navigate sound if the click caused a GUI transition (inventory changed)
-                    if (player.getOpenInventory().getTopInventory() != top) {
+                    if (getTopInventoryCompat(player.getOpenInventory()) != top) {
                         // GUI was replaced (e.g. confirm purchase), don't play another sound
                     } else if (event.getRawSlot() == gui.nextPageIndex || event.getRawSlot() == gui.prevPageIndex) {
                         if (gui.getNavigateSound() != null)
